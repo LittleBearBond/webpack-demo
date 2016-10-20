@@ -3,11 +3,11 @@ const webpack = require('webpack');
 const path = require('path');
 const jsDir = path.join(__dirname, './src/js');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const scanFiles = require('./tools/scan-files.js');
 
 let config = {
-    entry: {
-
-    },
+    entry: {},
     cache: true,
     debug: true,
     devtool: 'sourcemap',
@@ -42,7 +42,20 @@ let config = {
     externals: {
         'jquery': 'window.jQuery',
     },
-    plugins: []
+    plugins: [
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+            }
+        }),
+        new ExtractTextPlugin('[name]/styles.css'),
+        //CommonsChunkPlugin  https://segmentfault.com/a/1190000006871991
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'commons', // 这公共代码的chunk名为'commons'
+            filename: '[name].bundle.js', // 生成后的文件名，虽说用了[name]，但实际上就是'commons.bundle.js'了
+            minChunks: 3, // 设定要有4个chunk（即3个页面）加载的js模块才会被纳入公共代码。这数目自己考虑吧，我认为3-5比较合适。
+        })
+    ]
 };
 
 //get entry
@@ -50,13 +63,55 @@ let config = {
     config.entry['js/' + val] = path.resolve(jsDir, `./${val}`);
 });
 
-//CommonsChunkPlugin  https://segmentfault.com/a/1190000006871991
-var commonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin({
-    name: 'commons', // 这公共代码的chunk名为'commons'
-    filename: '[name].bundle.js', // 生成后的文件名，虽说用了[name]，但实际上就是'commons.bundle.js'了
-    minChunks: 3, // 设定要有4个chunk（即3个页面）加载的js模块才会被纳入公共代码。这数目自己考虑吧，我认为3-5比较合适。
-});
+if (process.env.NODE_ENV === 'production') {
+    config.plugins.push(
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                screw_ie8: true,
+                warnings: false
+            }
+        })
+    )
+    config.plugins.push(
+        new webpack.NoErrorsPlugin()
+    );
+} else {
+    config.devtool = "sourcemap";
 
-config.plugins.push(commonsChunkPlugin);
+    /*config.devServer = {
+        contentBase: './public',
+        hot: true,
+        inline: true,
+        host: "0.0.0.0",
+        port: 2708
+    }*/
+
+    config.plugins.push(
+        new webpack.HotModuleReplacementPlugin()
+    );
+
+    config.plugins.push(
+        new webpack.NoErrorsPlugin()
+    );
+}
+const pageDir = path.resolve(__dirname, './src/pages');
+
+//扫描所有页面
+scanFiles(path.resolve(__dirname, './src/pages'), val => {
+        return val.endsWith('.html')
+    })
+    .map(val => val.fullPath.replace(pageDir + '/', ''))
+    .forEach(pageName => {
+        config.plugins.push(new HtmlWebpackPlugin({
+            filename: `pages/${pageName}`,
+            template: path.resolve(pageDir, pageName),
+            chunks: [pageName, 'commons'],
+            inject: 'body',
+            hash: true, // 为静态资源生成hash值
+            xhtml: true,
+        }));
+    });
+
+console.log(config.plugins)
 
 module.exports = config;
