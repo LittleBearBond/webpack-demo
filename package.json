@@ -1,0 +1,20 @@
+{
+  "name": "my-webpack-demo",
+  "version": "1.0.0",
+  "description": "demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --hot --inline --config webpack.config.js --progress ",
+    "build": "npm run remove:build && export NODE_ENV=production&&webpack -p --config webpack.dist.config.js --progress --colors --display-modules",
+    "remove:build": "rm -rf build"
+  },
+  "keywords": [
+    "my-webpack-demo"
+  ],
+  "author": "xiongjian",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^1.13.2"
+  }
+}

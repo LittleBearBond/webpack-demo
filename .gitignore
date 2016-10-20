@@ -1,0 +1,55 @@
+npm-debug.log
+
+*/build.txt
+**/node_modules/
+node_modules/
+.idea/
+*/.idea/
+.idea/*
+#测试环境加入仓库
+#test/
+
+pull.sh
+dist/src/
+.remote-sync.json
+temp/
+test-main.js
+
+#eclipse files
+.project
+.settings
+
+#webstorm
+#IntellijIdea
+#vscode
+.iml
+*.iml
+*.tmp
+.vscode
+
+# temp files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Compiled Python files
+*.pyc
+
+#log files
+.log
+logs/*
+
+# Vim swap files
+*.swp
+
+.sass-cache/
+**/obj
+**/bin
+**/.ntvs_analysis.dat.tmp
+**/.ntvs_analysis.dat*
+
+
