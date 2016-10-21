@@ -1,13 +1,16 @@
 //https://segmentfault.com/a/1190000006863968
 const webpack = require('webpack');
 const path = require('path');
-const jsDir = path.join(__dirname, './src/js');
+const jsDir = path.resolve(__dirname, './src/js');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const scanFiles = require('./tools/scan-files.js');
-
+const nodeModulePath = path.resolve(__dirname, './node_modules');
 let config = {
-    entry: {},
+    entry: {
+        vue: 'vue',
+        commons: [path.resolve(__dirname, './src/js/common/utils')]
+    },
     cache: true,
     debug: true,
     devtool: 'sourcemap',
@@ -26,7 +29,7 @@ let config = {
         publicPath: '/',
         //这个路径配置 真TM的坑啊
         path: path.resolve(__dirname, './build'),
-        filename: '[name]/entry.js', //.[hash:8] // [name]表示entry每一项中的key，用以批量指定生成后文件的名称
+        filename: '[name].entry.js', //.[hash:8] // [name]表示entry每一项中的key，用以批量指定生成后文件的名称
         chunkFilename: '[id].bundle.js', //.[hash:8]
     },
     module: {
@@ -40,7 +43,7 @@ let config = {
         }]
     },
     externals: {
-        'jquery': 'window.jQuery',
+        'jquery': 'window.jQuery'
     },
     plugins: [
         new webpack.DefinePlugin({
@@ -52,8 +55,8 @@ let config = {
         //CommonsChunkPlugin  https://segmentfault.com/a/1190000006871991
         new webpack.optimize.CommonsChunkPlugin({
             name: 'commons', // 这公共代码的chunk名为'commons'
-            filename: '[name].bundle.js', // 生成后的文件名，虽说用了[name]，但实际上就是'commons.bundle.js'了
-            minChunks: 3, // 设定要有4个chunk（即3个页面）加载的js模块才会被纳入公共代码。这数目自己考虑吧，我认为3-5比较合适。
+            // filename: '[name].bundle.js', // 生成后的文件名，虽说用了[name]，但实际上就是'commons.bundle.js'了
+            // minChunks: 3, // 设定要有4个chunk（即3个页面）加载的js模块才会被纳入公共代码。这数目自己考虑吧，我认为3-5比较合适。
         })
     ]
 };
@@ -63,28 +66,42 @@ let config = {
     config.entry['js/' + val] = path.resolve(jsDir, `./${val}`);
 });
 
+//add noParse
+[
+    '/vue/dist/vue.js'
+].forEach(function (val) {
+    let depPath = path.join(nodeModulePath, val);
+    config.resolve.alias[val.split(path.sep)[1]] = depPath;
+    config.module.noParse.push(depPath);
+});
+console.log(process.env.NODE_ENV, '-----------------')
 if (process.env.NODE_ENV === 'production') {
     config.plugins.push(
         new webpack.optimize.UglifyJsPlugin({
             compress: {
                 screw_ie8: true,
                 warnings: false
-            }
+            },
+            output: {
+                comments: false, // remove all comments
+            },
         })
     )
     config.plugins.push(
         new webpack.NoErrorsPlugin()
     );
+    ['devtool', 'debug'].forEach(val => {
+        delete config[val];
+    });
 } else {
     config.devtool = "sourcemap";
 
-    /*config.devServer = {
-        contentBase: './public',
+    config.devServer = {
         hot: true,
         inline: true,
         host: "0.0.0.0",
-        port: 2708
-    }*/
+        port: 8080
+    }
 
     config.plugins.push(
         new webpack.HotModuleReplacementPlugin()
@@ -105,13 +122,12 @@ scanFiles(path.resolve(__dirname, './src/pages'), val => {
         config.plugins.push(new HtmlWebpackPlugin({
             filename: `pages/${pageName}`,
             template: path.resolve(pageDir, pageName),
-            chunks: [pageName, 'commons'],
+            chunks: ['js/' + pageName.replace('.html', ''), 'commons', 'vue'],
             inject: 'body',
             hash: true, // 为静态资源生成hash值
             xhtml: true,
         }));
     });
 
-console.log(config.plugins)
-
+// console.log(config.plugins[5])
 module.exports = config;

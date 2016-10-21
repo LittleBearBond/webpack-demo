@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --hot --inline --config webpack.config.js --progress ",
-    "build": "npm run remove:build && export NODE_ENV=production&&webpack -p --config webpack.dist.config.js --progress --colors --display-modules",
+    "build": "npm run remove:build && export NODE_ENV=production&&webpack -p --config webpack.config.js --progress --colors --display-modules",
     "remove:build": "rm -rf build"
   },
   "keywords": [
@@ -22,6 +22,8 @@
     "sass-loader": "^4.0.2",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.2"
+    "vue": "^2.0.3",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.2"
   }
 }

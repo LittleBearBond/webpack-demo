@@ -4,6 +4,7 @@ npm-debug.log
 **/node_modules/
 node_modules/
 .idea/
+build/
 */.idea/
 .idea/*
 #测试环境加入仓库
