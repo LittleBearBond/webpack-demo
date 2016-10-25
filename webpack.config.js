@@ -35,8 +35,8 @@ let config = {
     module: {
         noParse: [],
         loaders: [{
-            test: /(\.css|\.scss)/,
-            loader: ExtractTextPlugin.extract('style!css!postcss!sass?outputStyle=expanded'),
+            test: /((\.css|\.scss)$)/,
+            loader: ExtractTextPlugin.extract('style', 'css!postcss!sass?outputStyle=expanded'),
         }, {
             test: /\.(png|jpg|woff|woff2|eot|ttf|svg)$/,
             loader: 'url?limit=8192'
@@ -51,7 +51,9 @@ let config = {
                 'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
             }
         }),
-        new ExtractTextPlugin('[name]/styles.css'),
+        new ExtractTextPlugin('[name].css', {
+            allChunks: true
+        }),
         //CommonsChunkPlugin  https://segmentfault.com/a/1190000006871991
         new webpack.optimize.CommonsChunkPlugin({
             name: 'commons', // 这公共代码的chunk名为'commons'
@@ -60,6 +62,9 @@ let config = {
         })
     ]
 };
+for (let item of config.module.loaders) {
+    item.exclude = /node_modules/;
+}
 
 //get entry
 ['index', 'list', 'application'].forEach(val => {
@@ -74,7 +79,7 @@ let config = {
     config.resolve.alias[val.split(path.sep)[1]] = depPath;
     config.module.noParse.push(depPath);
 });
-console.log(process.env.NODE_ENV, '-----------------')
+// console.log(process.env.NODE_ENV, '-----------------')
 if (process.env.NODE_ENV === 'production') {
     config.plugins.push(
         new webpack.optimize.UglifyJsPlugin({
@@ -98,6 +103,7 @@ if (process.env.NODE_ENV === 'production') {
 
     config.devServer = {
         hot: true,
+        historyApiFallback: true,
         inline: true,
         host: "0.0.0.0",
         port: 8080
@@ -119,6 +125,7 @@ scanFiles(path.resolve(__dirname, './src/pages'), val => {
     })
     .map(val => val.fullPath.replace(pageDir + '/', ''))
     .forEach(pageName => {
+        //http://www.cnblogs.com/haogj/p/5160821.html
         config.plugins.push(new HtmlWebpackPlugin({
             filename: `pages/${pageName}`,
             template: path.resolve(pageDir, pageName),
