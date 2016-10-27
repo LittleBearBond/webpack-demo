@@ -1,9 +1,89 @@
-.main{
+.main {
     font-size: 14px;
     line-height: 20px;
-    .page-center{
+    .page-center {
         width: 90%;
         max-width: 13px;
         margin: 0 auto;
     }
+}
+
+%item {
+    background: #ccc;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 30px;
+    color: #fff;
+}
+
+.box {
+    /*
+        flex-direction : row | row-reverse | column | column-reverse;
+        flex-wrap: nowrap | wrap | wrap-reverse;
+        flex-flow: <flex-direction> || <flex-wrap>;
+        justify-content: flex-start | flex-end | center | space-between | space-around;
+        align-items: flex-start | flex-end | center | baseline | stretch;
+        align-content: flex-start | flex-end | center | space-between | space-around | stretch;
+    */
+    // display: inline-flex;
+    width: 500px;
+    height: 500px;
+    border: 2px solid #ccc;
+    display: flex;
+    /*justify-content: center;
+    align-items: center;
+    flex-direction: column;*/
+    /*flex-wrap: wrap;
+    align-content: space-between;*/
+
+    justify-content: center;
+    align-items: center;
+    .column {
+        flex-basis: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+    .item {
+        // flex: 1;
+
+        @extend %item;
+        /*+.item{
+            margin-left: 20px;
+        }*/
+    }
+}
+
+.Grid {
+    display: flex;
+}
+
+.Grid-cell {
+    flex: 1;
+    background: #ccc;
+}
+
+.Grid-cell.u-full {
+    flex: 0 0 100%;
+}
+
+.Grid-cell.u-1of2 {
+    flex: 0 0 50%;
+}
+
+.Grid-cell.u-1of3 {
+    flex: 0 0 33.3333%;
+}
+
+.Grid-cell.u-1of4 {
+    flex: 0 0 25%;
+}
+
+.InputAddOn {
+    display: flex;
+}
+
+.InputAddOn-field {
+    flex: 1;
 }
