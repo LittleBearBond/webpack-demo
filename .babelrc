@@ -1,0 +1,7 @@
+{
+    "presets": [
+        "es2015", // will run third
+        //"react", // will run second
+        "stage-0" // will run first
+    ]
+}

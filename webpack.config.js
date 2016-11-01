@@ -35,6 +35,9 @@ let config = {
     module: {
         noParse: [],
         loaders: [{
+            test: /\.(js|jsx)$/,
+            loader: 'babel',
+        }, {
             test: /((\.css|\.scss)$)/,
             loader: ExtractTextPlugin.extract('style', 'css!postcss!sass?outputStyle=expanded'),
         }, {
