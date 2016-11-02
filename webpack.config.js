@@ -8,8 +8,9 @@ const scanFiles = require('./tools/scan-files.js');
 const nodeModulePath = path.resolve(__dirname, './node_modules');
 let config = {
     entry: {
-        vue: 'vue',
-        commons: [path.resolve(__dirname, './src/js/common/utils')]
+        'vue': 'vue',
+        'vue-router': 'vue-router',
+        'commons': [path.resolve(__dirname, './src/js/common/utils')]
     },
     cache: true,
     debug: true,
@@ -23,7 +24,8 @@ let config = {
         alias: {
             'styles': path.resolve(__dirname, './src/styles'),
             'components': path.resolve(__dirname, './src/components/')
-        }
+        },
+        root: path.resolve(__dirname, './')
     },
     output: {
         publicPath: '/',
@@ -38,7 +40,7 @@ let config = {
             test: /\.(js|jsx)$/,
             loader: 'babel',
         }, {
-            test: /((\.css|\.scss)$)/,
+            test: /\.(css|scss)$/,
             loader: ExtractTextPlugin.extract('style', 'css!postcss!sass?outputStyle=expanded'),
         }, {
             test: /\.(png|jpg|woff|woff2|eot|ttf|svg)$/,
@@ -65,6 +67,7 @@ let config = {
         })
     ]
 };
+
 for (let item of config.module.loaders) {
     item.exclude = /node_modules/;
 }
@@ -76,12 +79,14 @@ for (let item of config.module.loaders) {
 
 //add noParse
 [
-    '/vue/dist/vue.js'
+    './vue/dist/vue.js',
+    './vue-router/dist/vue-router.js'
 ].forEach(function (val) {
-    let depPath = path.join(nodeModulePath, val);
+    let depPath = path.resolve(nodeModulePath, val);
     config.resolve.alias[val.split(path.sep)[1]] = depPath;
     config.module.noParse.push(depPath);
 });
+
 // console.log(process.env.NODE_ENV, '-----------------')
 if (process.env.NODE_ENV === 'production') {
     config.plugins.push(
@@ -132,7 +137,7 @@ scanFiles(path.resolve(__dirname, './src/pages'), val => {
         config.plugins.push(new HtmlWebpackPlugin({
             filename: `pages/${pageName}`,
             template: path.resolve(pageDir, pageName),
-            chunks: ['js/' + pageName.replace('.html', ''), 'commons', 'vue'],
+            chunks: ['vue', 'vue-router', 'js/' + pageName.replace('.html', ''), 'commons'],
             inject: 'body',
             hash: true, // 为静态资源生成hash值
             xhtml: true,
