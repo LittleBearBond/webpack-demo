@@ -12,9 +12,11 @@ Vue.use(VueRouter);
 const Foo = {
     template: '<div> <h1>foo</h1> </div>'
 }
+
 const Bar = {
     template: '<div><h1>bar</h1></div>'
 }
+
 const Home = {
     template: '<div><h1>Home</h1><p>{{msg}}</p></div>',
     data: function () {
@@ -26,6 +28,25 @@ const Home = {
 
 const About = {
     template: '<div><h1>About</h1><p>This is the tutorial about vue-router.</p></div>'
+}
+
+const User = {
+    template: `
+     <div>
+        <h2>User {{ $route.params.id }}</h2>
+        <hr> 
+        <router-view></router-view>
+    </div>
+    `
+}
+const UserHome = {
+    template: '<div class="alert alert-success">Home</div>'
+}
+const UserProfile = {
+    template: '<div class="alert alert-info">Profile</div>'
+}
+const UserPosts = {
+    template: '<div class="alert alert-danger">Posts</div>'
 }
 
 // 2. 定义路由
@@ -45,6 +66,31 @@ const routes = [{
 }, {
     path: '/about',
     component: About
+}, {
+    path: '/user/:id',
+    component: User,
+    children: [
+        // UserHome will be rendered inside User's <router-view>
+        // when /user/:id is matched
+        {
+            path: '',
+            component: UserHome
+        },
+
+        // UserProfile will be rendered inside User's <router-view>
+        // when /user/:id/profile is matched
+        {
+            path: 'profile',
+            component: UserProfile
+        },
+
+        // UserPosts will be rendered inside User's <router-view>
+        // when /user/:id/posts is matched
+        {
+            path: 'posts',
+            component: UserPosts
+        }
+    ]
 }]
 
 // 3. 创建 router 实例，然后传 `routes` 配置
@@ -56,6 +102,7 @@ const router = new VueRouter({
 // 4. 创建和挂载根实例。
 // 记得要通过 router 配置参数注入路由，
 // 从而让整个应用都有路由功能
+
 const app = new Vue({
     router
 }).$mount('#app');
