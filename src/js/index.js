@@ -27,7 +27,18 @@ const Home = {
 }
 
 const About = {
-    template: '<div><h1>About</h1><p>This is the tutorial about vue-router.</p></div>'
+    template: '<div><h1>About</h1><p>This is the tutorial about vue-router.</p></div>',
+    beforeRouteEnter(to, from, next) {
+        // 在渲染该组件的对应路由被 confirm 前调用
+        // 不！能！获取组件实例 `this`
+        // 因为当钩子执行前，组件实例还没被创建
+        console.log('beforeRouteEnter')
+    },
+    beforeRouteLeave(to, from, next) {
+        // 导航离开该组件的对应路由时调用
+        // 可以访问组件实例 `this`
+        console.log('beforeRouteLeave')
+    }
 }
 
 const User = {
@@ -65,7 +76,10 @@ const routes = [{
     component: Home
 }, {
     path: '/about',
-    component: About
+    component: About,
+    beforeEnter: () => {
+        console.log('About beforeEnter')
+    }
 }, {
     path: '/user/:id',
     component: User,
@@ -98,6 +112,15 @@ const routes = [{
 const router = new VueRouter({
     routes // （缩写）相当于 routes: routes
 })
+router.beforeEach((to, from, next) => {
+    // console.log(to, from, next)
+    console.log('beforeEach')
+});
+router.afterEach(route => {
+    // console.log(route)
+    console.log('afterEach')
+})
+
 
 // 4. 创建和挂载根实例。
 // 记得要通过 router 配置参数注入路由，
