@@ -6,15 +6,28 @@ import {
 import Directive from './directive';
 
 class MyVue {
+    /**
+     * Creates an instance of MyVue.        
+     * 
+     * @param {Object} [options={}]
+     * 
+     * @memberOf this
+     */
     constructor(options = {}) {
-        this.options = options;
-        this._directives = []
-        this._watchers = []
-        this._isVue = true
+            this.options = options;
+            this._directives = []
+            this._watchers = []
+            this._isVue = true
 
-        this.debug = !!this.options.debug;
-        this._init();
-    }
+            this.debug = !!this.options.debug;
+            this._init();
+        }
+        /**
+         * init function
+         * 
+         * 
+         * @memberOf MyVue
+         */
     _init() {
             this._el = document.querySelector(this.options.el);
             if (!this._el) {
@@ -61,7 +74,7 @@ class MyVue {
         })
     }
     _compile() {
-        // compileRoot(this._el)(this, this._el)
+        //compileRoot(this._el)(this, this._el)
         compile(this._el)(this, this._el)
     }
     _log(...args) {

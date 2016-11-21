@@ -16,12 +16,19 @@ class Directive {
             this.el.removeAttribute(descriptor.attr || 'v-' + name)
         }
 
+        //model or text
         var def = descriptor.def
+
+        //注入到当前对象
         this.update = def.update
         this.bind = def.bind
 
-        if (this.bind) this.bind()
-
+        if (this.bind) {
+            //el--->model
+            this.bind()
+        }
+        
+        //model---->el
         this._update = function (val) {
             this.update(val)
         }.bind(this)

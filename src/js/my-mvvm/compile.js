@@ -1,4 +1,3 @@
-
 import config from './config';
 
 import {
@@ -22,27 +21,39 @@ export function compileRoot(el, options) {
 }
 
 export function compile(el, options) {
+    //当前这个根节点
     let nodeLinkFn = compileNode(el, options)
+
+    //所有子节点
     let childLinkFn = el.hasChildNodes() ? compileNodeList(el.childNodes, options) : null
 
     return function compositeLinkFn(vm, el) {
         var childNodes = [].slice.call(el.childNodes)
         linkAndCapture(function () {
-            if (nodeLinkFn) nodeLinkFn(vm, el)
-            if (childLinkFn) childLinkFn(vm, childNodes)
+            if (nodeLinkFn) {
+                //===> vm._bindDir(dir, el)
+                nodeLinkFn(vm, el)
+            }
+            if (childLinkFn) {
+                childLinkFn(vm, childNodes)
+            }
         }, vm)
     }
 }
+
 const linkAndCapture = function (linker, vm) {
     var originalDirCount = vm._directives.length
     linker()
-    
     var dirs = vm._directives.slice(originalDirCount)
     dirs.forEach(function (dir) {
         dir._bind()
     })
     return dirs
 }
+
+/** 
+ * 递归编译所有子节点
+ */
 const compileNodeList = function (nodeList, options) {
     let linkFns = []
     let nodeLinkFn, childLinkFn, node
@@ -62,8 +73,12 @@ const makeChildLinkFn = function (linkFns) {
             node = nodes[n]
             nodeLinkFn = linkFns[i++]
             childrenLinkFn = linkFns[i++]
-            if (nodeLinkFn) nodeLinkFn(vm, node)
-            if (childrenLinkFn) childrenLinkFn(vm, toArray(node.childNodes))
+            if (nodeLinkFn) {
+                nodeLinkFn(vm, node)
+            }
+            if (childrenLinkFn) {
+                childrenLinkFn(vm, toArray(node.childNodes))
+            }
         }
     }
 }
@@ -86,6 +101,7 @@ const compileElement = function (node, options) {
         let exp = node.getAttribute('v-model').trim()
         return exp && makeNodeLinkFn({
             name: 'model',
+            //data key 
             exp: exp,
             def: model
         })
@@ -95,21 +111,28 @@ const compileElement = function (node, options) {
 
 const compileTextNode = function (node, options) {
     let tokens = parseText(node.wholeText)
-    if (tokens.length) {
-        //创建文档片段
-        let frag = document.createDocumentFragment()
-        tokens.forEach(function (token) {
-            let el = token.tag ? processTextToken(token) : document.createTextNode(token.value)
-            frag.appendChild(el)
-        })
-        return makeTextNodeLinkFn(tokens, frag)
+    if (!tokens.length) {
+        return null;
     }
-}
-
-const makeNodeLinkFn = function (dir) {
-    return function (vm, el) {
-        vm._bindDir(dir, el)
-    }
+    //创建文档片段,用来包裹文本
+    let frag = document.createDocumentFragment();
+    /**
+     * 
+     tokens:[{
+        tag: true,
+        value: ''
+        descriptor: {
+            name: 'text',
+            exp: token.value,
+            def: text
+        }
+        }]
+    */
+    tokens.forEach(function (token) {
+        let el = token.tag ? processTextToken(token) : document.createTextNode(token.value)
+        frag.appendChild(el)
+    })
+    return makeTextNodeLinkFn(tokens, frag)
 }
 
 /**
@@ -154,24 +177,31 @@ const parseText = function (text) {
 
 const processTextToken = function (token) {
     let el = document.createTextNode(' ')
-    // 简化，双向绑定，text 模式
+        // 简化，双向绑定，text 模式
     token.descriptor = {
         name: 'text',
+        //data key 
         exp: token.value,
         def: text
     }
     return el
 }
 
+const makeNodeLinkFn = function (dir) {
+    return function nodeLinkFn(vm, el) {
+        vm._bindDir(dir, el)
+    }
+}
+
 const makeTextNodeLinkFn = function (tokens, frag) {
+
     return function textNodeLinkFn(vm, el) {
         let fragClone = frag.cloneNode(true)
         let childNodes = toArray(fragClone.childNodes)
         tokens.forEach(function (token, i) {
             let value = token.value
             if (token.tag) {
-                let node = childNodes[i]
-                vm._bindDir(token.descriptor, node)
+                vm._bindDir(token.descriptor, childNodes[i])
             }
         })
         replaceNode(el, fragClone)
