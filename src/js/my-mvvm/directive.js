@@ -24,7 +24,7 @@ class Directive {
         this.bind = def.bind
 
         if (this.bind) {
-            //el--->model
+            //el--->modexiong'jian
             this.bind()
         }
         
