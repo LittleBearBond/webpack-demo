@@ -14,7 +14,9 @@ let config = {
     },
     cache: true,
     debug: true,
-    devtool: 'sourcemap',
+    //https://segmentfault.com/a/1190000004280859
+    //cheap-module-source-map
+    devtool: 'cheap-module-eval-source-map', //'sourcemap',
     stats: {
         colors: true,
         reasons: true
@@ -81,7 +83,7 @@ for (let item of config.module.loaders) {
 [
     './vue/dist/vue.js',
     './vue-router/dist/vue-router.js'
-].forEach(function (val) {
+].forEach(function(val) {
     let depPath = path.resolve(nodeModulePath, val);
     config.resolve.alias[val.split(path.sep)[1]] = depPath;
     config.module.noParse.push(depPath);
